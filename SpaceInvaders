@@ -1,0 +1,101 @@
+#!/usr/bin/env perl6
+use lib 'lib';
+use Steroids;
+
+class Main is Steroids::State {
+    has $!player;
+    has @!invaders;
+    has $!bullets_alive = 0;
+
+    method create {
+        self.load_bitmap('background', 'assets/background.png');
+        self.add_sprite('background', 0, 0);
+        self.load_spritesheet('spaceship', 'assets/spaceship.png', 72, 72, 4);
+        self.load_spritesheet('invader', 'assets/invader.png', 72, 32, 7);
+        self.load_bitmap('laser', 'assets/laser.png');
+        $!player = self.add_sprite('spaceship', 0, 0);
+        $!player.y = self.height - 108;
+        $!player.x = Int(self.width/2 - 36);
+
+        for ^20 -> $n {
+            my $row = Int($n / 7);
+            my $col = $n % 7;
+            my $invader = self.add_sprite('invader', 72 + $col * 144, $row * 64);
+            $invader.when({ $_.velocity[0] != 0 and ($_.x <= 0 or $_.x + $_.w >= self.width) }, {
+                $_.velocity = [0, 8];
+                $_.y += 8;
+            });
+            $invader.when({ $_.velocity[1] > 0 and $_.y %% $_.h }, {
+                $_.velocity = [-8, 0];
+                $_.velocity[0] = 8 if $_.x <= 0;
+            });
+            $invader.velocity = [0, 8];
+            self.add_animation($invader, Any, 200, True);
+            @!invaders.push: $invader;
+        }
+
+        self.add_animation($!player, Any, 200, True);
+    }
+
+    method fire {
+        return if $!bullets_alive;
+        my $bullet = self.add_sprite('laser', $!player.x, $!player.y);
+        $bullet.x += Int($!player.w/2 - $bullet.w/2);
+        $bullet.velocity = [0, -15];
+        for @!invaders -> $invader {
+            $bullet.when({ .collides_with($invader) }, {
+                self.remove_sprite($invader);
+                self.remove_sprite($bullet);
+                @!invaders.=grep(* !=== $invader);
+                $!bullets_alive--;
+            });
+        }
+        $bullet.when({ .y + .h < 0 }, {
+            self.remove_sprite($bullet);
+            $!bullets_alive--;
+        });
+        $!bullets_alive++;
+    }
+
+    method keypressed($k) {
+        if $k eq any("Up", "Space") {
+            self.fire
+        }
+    }
+
+    method gamepad($ev) {
+        if self.gamepads[0].is_pressed("A") {
+            self.fire
+        }
+    }
+
+    method update($dt) {
+        my $pad = self.gamepads[0];
+        my $analog = $pad.analog_percentage($pad.analog_left_x);
+
+        if self.is_pressed("Left") or $pad.dpad_position("Left") {
+            $!player.x -= 15;
+        } elsif self.is_pressed("Right") or $pad.dpad_position("Right") {
+            $!player.x += 15;
+        } elsif $analog.abs > 0.1 {
+            $!player.x += Int(15 * $analog);
+        }
+
+        if $!player.x < 0 {
+            $!player.x = 0
+        } elsif $!player.x + $!player.w > self.width {
+            $!player.x = self.width - $!player.w
+        }
+
+        unless @!invaders {
+            say "Congratulations, you held off the attack!";
+            self.quit;
+        }
+    }
+}
+
+given Steroids::Game.new {
+    .add_state('main', Main.new);
+    .change_state('main');
+    .start;
+}

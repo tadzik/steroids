@@ -1,0 +1,11 @@
+LIBS=$(shell sdl2-config --libs) -lSDL2_image
+CFLAGS=$(shell sdl2-config --cflags)
+
+all: sdlwrapper.so
+
+sdlwrapper.so: sdlwrapper.c
+	cc $(CFLAGS) -c -fPIC -o sdlwrapper.o  -O1 -DNDEBUG  -D_REENTRANT -D_FILE_OFFSET_BITS=64 -fPIC sdlwrapper.c
+	cc -shared -fPIC  -O1 -DNDEBUG -Wl,-rpath,/home/tadzik/.rakudobrew/moar-HEAD/install/lib -lm -lpthread -lrt -ldl -o sdlwrapper.so sdlwrapper.o $(LIBS) 
+
+clean:
+	rm -f *.so *.o
