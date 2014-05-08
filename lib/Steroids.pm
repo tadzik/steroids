@@ -13,9 +13,7 @@ class Game {
     has $!current-state;
     has @.gamepads = Steroids::Gamepad.new;
     
-    submethod BUILD(:$!width, :$!height) {
-        $!width //= 1024;
-        $!height //= 768;
+    submethod BUILD(:$!width = 1024, :$!height = 768) {
         $!game := game_init($!width, $!height);
         for ^SDL_NumJoysticks() {
             @!gamepads.push: Steroids::Gamepad.new;
