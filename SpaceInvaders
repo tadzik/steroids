@@ -1,5 +1,5 @@
 #!/usr/bin/env perl6
-use lib 'lib';
+use lib 'blib/lib';
 use Steroids;
 
 class Main is Steroids::State {
