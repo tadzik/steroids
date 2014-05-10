@@ -5,9 +5,10 @@ class Steroids::State {
     has Mu $!game;
     # the actual Steroids::Game object
     has $.parent handles<is_pressed quit load_bitmap load_spritesheet
-                         assets width height gamepads> is rw;
+                         assets width height gamepads change_state> is rw;
     has @.entities;
     has @!animations;
+    has $.paused is rw;
 
     method create { ... }
     method update(int) { ... }
@@ -74,6 +75,7 @@ class Steroids::State {
     }
 
     method animations(int32 $dt) {
+        return if $!paused;
         my @active;
         for @!animations {
             if $_.advance($dt) {
@@ -84,6 +86,7 @@ class Steroids::State {
     }
 
     method events {
+        return if $!paused;
         for @!entities -> $ent {
             for $ent.events -> $ev {
                 if $ev[0].($ent) {
@@ -94,6 +97,7 @@ class Steroids::State {
     }
 
     method physics(int32 $dt) {
+        return if $!paused;
         for @!entities {
             $_.x += $_.velocity[0];
             $_.y += $_.velocity[1];
