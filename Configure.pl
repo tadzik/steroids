@@ -11,7 +11,7 @@ if $*VM<name> eq 'parrot' {
 }
 elsif $*VM<name> eq 'moar' {
     my $o  = $*VM<config><obj>;
-    my $so = $*VM<config><dll>.subst('%s', '');
+    my $so = $*VM<config><dll>.subst('lib%s', '');
     $c_line = "-c $*VM<config><ccshared> $*VM<config><ccout>$name$o $*VM<config><cflags> $name.c";
     $l_line = "$*VM<config><ldshared> $*VM<config><ldflags> " ~
         "$*VM<config><ldlibs> $*VM<config><ldout>$name$so $name$o";
@@ -26,9 +26,9 @@ else {
     die "Unknown VM; don't know how to compile libraires";
 }
 
-given open('Makefile', :w) {
+given open('Makefile.sdlwrapper', :w) {
     .say:
-q[LIBS=$(shell sdl2-config --libs) -lSDL2_image
+q[LIBS=$(shell sdl2-config --libs) -lSDL2_image -lSDL2_ttf
 CFLAGS=$(shell sdl2-config --cflags)] ~ qq[
 
 all: sdlwrapper.so
