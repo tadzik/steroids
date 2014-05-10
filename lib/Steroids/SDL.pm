@@ -6,7 +6,7 @@ class Texture is repr('CStruct') {
     has int32 $.w;
     has int32 $.h;
 
-    method draw($game, $x, $y) {
+    method draw($game, $x, $y, $frame) {
         game_draw_texture($game, self, $x, $y)
     }
 }

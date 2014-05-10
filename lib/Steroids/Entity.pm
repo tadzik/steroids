@@ -4,11 +4,12 @@ class Steroids::Entity {
     has Int $.y is rw;
     has $.velocity is rw = [0, 0];
     has $.img handles <w h>;
+    has $.frame is rw = 0;
     has @.events;
     has $.payload; # whatever the user wants to put here
 
     method draw($game) {
-        $!img.draw($game, $!x, $!y)
+        $!img.draw($game, $!x, $!y, $!frame)
     }
 
     method when (&condition, &action) {

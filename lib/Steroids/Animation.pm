@@ -24,7 +24,7 @@ class Steroids::Animation {
             }
             $!elapsed -= $!step;
         }
-        $!entity.img.frame = @!frames[$!current];
+        $!entity.frame = @!frames[$!current];
         return True # keep animating
     }
 }
