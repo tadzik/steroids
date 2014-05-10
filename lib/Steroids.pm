@@ -32,7 +32,7 @@ class Game {
 
     method add_state(Str $name, Steroids::State $state) {
         $state.parent = self;
-        nqp::bindattr($state, Steroids::State, '$!game', $!game);
+        nqp::bindattr(nqp::decont($state), Steroids::State, '$!game', $!game);
         %!states{$name} = $state;
         $state.create;
         return self
