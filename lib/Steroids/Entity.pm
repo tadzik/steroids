@@ -17,7 +17,12 @@ class Steroids::Entity {
 
     # XXX custom hitboxes
     method collides_with(Steroids::Entity $other) {
-        abs($!x - $other.x) * 2 <= ($.w + $other.w) and
-        abs($!y - $other.y) * 2 <= ($.h + $other.h)
+        if ($other.x <= $!x <= $other.x + $other.w
+            or $other.x < $!x + self.w < $other.x + $other.w)
+        and ($other.y <= $!y <= $other.y + $other.h
+            or $other.y <= $!y + self.h <= $other.y + $other.h) {
+            return True
+        }
+        return False
     }
 }
