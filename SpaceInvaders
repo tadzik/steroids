@@ -53,7 +53,6 @@ class Main is Steroids::State {
                 my $exp = self.add_sprite('explosion',
                     Int($invader.x + $invader.w/2),
                     Int($invader.y + $invader.h/2));
-                $exp.img.debug = True;
                 $exp.x -= Int($exp.w/2);
                 $exp.y -= Int($exp.h * 2/3);
                 my $anim = self.add_animation($exp, Any, 20, False);
