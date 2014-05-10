@@ -32,8 +32,7 @@ class Main is Steroids::State {
             });
             $invader.when({ $_.y >= self.height }, {
                 say "You have failed. The earth as you know it is gone :(";
-                #self.change_state('menu');
-                self.quit;
+                self.change_state('menu');
             });
             $invader.velocity = [0, 8];
             self.add_animation($invader, Any, 200, True);
@@ -111,20 +110,32 @@ class Main is Steroids::State {
 
         unless @!invaders {
             say "Congratulations, you held off the attack!";
-            #self.change_state('menu');
-            self.quit;
+            self.change_state('menu');
         }
     }
 }
 
 class Menu is Steroids::State {
     method create {
+        self.load_font('default', 'assets/font.ttf', 48);
         self.load_bitmap('background', 'assets/background.png');
         self.add_sprite('background', 0, 0);
+        my $t = self.add_text('(S)tart a new game', 'default', Steroids::Colour.white,
+                              Int(self.width/2), Int(self.height/2));
+        $t.y -= $t.h;
+        $t.x -= Int($t.w/2);
+        $t = self.add_text('(Q)uit', 'default', Steroids::Colour.white,
+                           Int(self.width/2), Int(self.height/2));
+        $t.x -= Int($t.w/2);
     }
 
     method keypressed($k) {
-        self.change_state('main')
+        if $k eq 'S' {
+            self.reset_state('main');
+            self.change_state('main');
+        } elsif $k eq 'Q' {
+            self.quit;
+        }
     }
 
     method update($dt) {
@@ -132,8 +143,8 @@ class Menu is Steroids::State {
 }
 
 given Steroids::Game.new {
-    .add_state('menu', Menu.new);
-    .add_state('main', Main.new);
-    .change_state('main');
+    .add_state('menu', { Menu.new });
+    .add_state('main', { Main.new });
+    .change_state('menu');
     .start;
 }

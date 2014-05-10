@@ -1,5 +1,6 @@
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 #include <stdlib.h>
 
 typedef struct {
@@ -62,6 +63,7 @@ extern Game *
 game_init(int width, int height)
 {
     SDL_Init(SDL_INIT_EVERYTHING);
+    TTF_Init();
     IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
     SDL_JoystickEventState(SDL_ENABLE);
 
@@ -261,4 +263,31 @@ game_free(Game *game)
     SDL_DestroyWindow(game->window);
     SDL_Quit();
     free(game);
+}
+
+extern TTF_Font *
+game_open_font(const char *path, int size)
+{
+    TTF_Font *ret = TTF_OpenFont(path, size);
+    if (!ret) {
+        printf("Error loading font: %s\n", TTF_GetError());
+    }
+    return ret;
+}
+
+extern Texture *
+game_render_text(Game *game, TTF_Font *font, const char *text, int r, int g, int b, int a)
+{
+    SDL_Color color = { r, g, b, a };
+    SDL_Surface *surf = TTF_RenderText_Solid(font, text, color);
+    if (!surf) {
+        printf("Error rendering text: %s\n", TTF_GetError());
+        return NULL;
+    }
+    SDL_Texture *tex = SDL_CreateTextureFromSurface(game->renderer, surf);
+    Texture *ret = malloc(sizeof(Texture));
+    ret->tex = tex;
+    ret->w = surf->w;
+    ret->h = surf->h;
+    return ret;
 }

@@ -1,4 +1,4 @@
-LIBS=$(shell sdl2-config --libs) -lSDL2_image
+LIBS=$(shell sdl2-config --libs) -lSDL2_image -lSDL2_ttf
 CFLAGS=$(shell sdl2-config --cflags)
 
 all: sdlwrapper.so

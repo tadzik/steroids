@@ -44,6 +44,10 @@ sub game_draw_spritesheet_frame(OpaquePointer, Texture,
                                 int32, int32, int32, int32, int32) is native(PATH) is export { * }
                                 # fw    fh     fn      x      y
 sub game_renderer_present(OpaquePointer)                           is native(PATH) is export { * }
+sub game_render_text(OpaquePointer, OpaquePointer, Str, int32, int32, int32, int32)
+                                                   returns Texture is native(PATH) is export { * }
+sub game_open_font(Str, int32) returns OpaquePointer               is native(PATH) is export { * }
 
 sub SDL_GetKeyName(int32) returns Str                         is native(PATH) is export { * }
 sub SDL_NumJoysticks() returns int32                          is native(PATH) is export { * }
+

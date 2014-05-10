@@ -1,11 +1,12 @@
 class Steroids::State {
     use Steroids::SDL;
+    use Steroids::Colour;
     use Steroids::Entity;
     use Steroids::Animation;
     has Mu $!game;
     # the actual Steroids::Game object
-    has $.parent handles<is_pressed quit load_bitmap load_spritesheet
-                         assets width height gamepads change_state> is rw;
+    has $.parent handles<is_pressed quit load_bitmap load_font load_spritesheet
+                         assets width height gamepads change_state reset_state> is rw;
     has @.entities;
     has @!animations;
     has $.paused is rw;
@@ -15,48 +16,17 @@ class Steroids::State {
     method keypressed($k) { }
     method gamepad($ev) { }
 
-    method activate {
-        sub key_cb(int32 $k) {
-            my $str = SDL_GetKeyName($k);
-            my $key = nqp::p6box_i($k) but role { method Str { $str } };
-            self.keypressed($key);
-            CATCH {
-                .say
-            }
-        }
-        sub gamepad_cb(Steroids::Gamepad::Event $ev) {
-            self.gamepads[$ev.id].update($ev);
-            self.gamepad($ev);
-            CATCH {
-                .say
-            }
-        }
-        sub update_cb(int32 $dt) {
-            self.physics($dt);
-            self.events();
-            self.animations($dt);
-            self.update($dt);
-            CATCH {
-                .say
-            }
-        }
-        sub draw_cb {
-            self.draw();
-            CATCH {
-                .say
-            }
-        }
-        game_set_keypressed_cb($!game, &key_cb);
-        game_set_update_cb($!game, &update_cb);
-        game_set_gamepad_cb($!game, &gamepad_cb);
-        game_set_draw_cb($!game, &draw_cb);
-    }
-
-    method add_sprite(Str $asset, Int $x, Int $y) {
+    multi method add_sprite(Str $asset, Int $x, Int $y) {
         unless %.assets{$asset}:exists {
             die "No such asset loaded: $asset"
         }
         my $d = Steroids::Entity.new(:$x, :$y, :img(%.assets{$asset}));
+        @!entities.push: $d;
+        return $d;
+    }
+
+    multi method add_sprite(Texture $sprite, Int $x, Int $y) {
+        my $d = Steroids::Entity.new(:$x, :$y, :img($sprite));
         @!entities.push: $d;
         return $d;
     }
@@ -72,6 +42,15 @@ class Steroids::State {
         my $a = Steroids::Animation.new(:$entity, :$frames, :$step, :$loop);
         @!animations.push: $a;
         return $a;
+    }
+
+    method add_text(Str $text, Str $font, Steroids::Colour $c, Int $x, Int $y) {
+        unless self.parent.fonts{$font}:exists {
+            die "Font $font not loaded"
+        }
+        my Mu $f := self.parent.fonts{$font};
+        my $tex = game_render_text($!game, $f, $text, $c.red, $c.green, $c.blue, $c.alpha);
+        return self.add_sprite($tex, $x, $y);
     }
 
     method animations(int32 $dt) {
