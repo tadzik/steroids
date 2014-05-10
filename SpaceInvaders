@@ -12,6 +12,7 @@ class Main is Steroids::State {
         self.add_sprite('background', 0, 0);
         self.load_spritesheet('spaceship', 'assets/spaceship.png', 72, 72, 4);
         self.load_spritesheet('invader', 'assets/invader.png', 72, 32, 7);
+        self.load_spritesheet('explosion', 'assets/boom.png', 128, 128, 64);
         self.load_bitmap('laser', 'assets/laser.png');
         $!player = self.add_sprite('spaceship', 0, 0);
         $!player.y = self.height - 108;
@@ -29,6 +30,11 @@ class Main is Steroids::State {
                 $_.velocity = [-8, 0];
                 $_.velocity[0] = 8 if $_.x <= 0;
             });
+            $invader.when({ $_.y >= self.height }, {
+                say "You have failed. The earth as you know it is gone :(";
+                #self.change_state('menu');
+                self.quit;
+            });
             $invader.velocity = [0, 8];
             self.add_animation($invader, Any, 200, True);
             @!invaders.push: $invader;
@@ -38,15 +44,26 @@ class Main is Steroids::State {
     }
 
     method fire {
-        return if $!bullets_alive;
+        return if $!bullets_alive > 2;
         my $bullet = self.add_sprite('laser', $!player.x, $!player.y);
         $bullet.x += Int($!player.w/2 - $bullet.w/2);
         $bullet.velocity = [0, -15];
         for @!invaders -> $invader {
             $bullet.when({ .collides_with($invader) }, {
-                self.remove_sprite($invader);
+                my $exp = self.add_sprite('explosion',
+                    Int($invader.x + $invader.w/2),
+                    Int($invader.y + $invader.h/2));
+                $exp.img.debug = True;
+                $exp.x -= Int($exp.w/2);
+                $exp.y -= Int($exp.h * 2/3);
+                my $anim = self.add_animation($exp, Any, 20, False);
+                $invader.velocity = [0, 0];
+                $exp.when({ $anim.finished }, {
+                    self.remove_sprite($exp);
+                    self.remove_sprite($invader);
+                    @!invaders.=grep(* !=== $invader);
+                });
                 self.remove_sprite($bullet);
-                @!invaders.=grep(* !=== $invader);
                 $!bullets_alive--;
             });
         }
@@ -61,11 +78,17 @@ class Main is Steroids::State {
         if $k eq any("Up", "Space") {
             self.fire
         }
+        if $k eq "Escape" {
+            self.paused = !self.paused;
+        }
     }
 
     method gamepad($ev) {
         if self.gamepads[0].is_pressed("A") {
             self.fire
+        }
+        if self.gamepads[0].is_pressed("START") {
+            self.paused = !self.paused;
         }
     }
 
@@ -89,12 +112,28 @@ class Main is Steroids::State {
 
         unless @!invaders {
             say "Congratulations, you held off the attack!";
+            #self.change_state('menu');
             self.quit;
         }
     }
 }
 
+class Menu is Steroids::State {
+    method create {
+        self.load_bitmap('background', 'assets/background.png');
+        self.add_sprite('background', 0, 0);
+    }
+
+    method keypressed($k) {
+        self.change_state('main')
+    }
+
+    method update($dt) {
+    }
+}
+
 given Steroids::Game.new {
+    .add_state('menu', Menu.new);
     .add_state('main', Main.new);
     .change_state('main');
     .start;
