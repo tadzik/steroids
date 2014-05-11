@@ -118,15 +118,21 @@ class Main is Steroids::State {
 class Menu is Steroids::State {
     method create {
         self.load_font('default', 'assets/font.ttf', 48);
+        self.load_bitmap('xb_start', 'assets/xb_start.png');
+        self.load_bitmap('xb_back', 'assets/xb_back.png');
         self.load_bitmap('background', 'assets/background.png');
         self.add_sprite('background', 0, 0);
         my $t = self.add_text('(S)tart a new game', 'default', Steroids::Colour.white,
-                              Int(self.width/2), Int(self.height/2));
+                              Int(self.width/2), Int(self.height/2) - 40);
         $t.y -= $t.h;
         $t.x -= Int($t.w/2);
+        my $b = self.add_sprite('xb_start', $t.x + $t.w + 20, $t.y);
+        $b.y -= Int($b.h/2);
         $t = self.add_text('(Q)uit', 'default', Steroids::Colour.white,
-                           Int(self.width/2), Int(self.height/2));
+                           Int(self.width/2), Int(self.height/2) + 40);
         $t.x -= Int($t.w/2);
+        $b = self.add_sprite('xb_back', $t.x + $t.w + 20, $t.y);
+        $b.y -= Int($b.h/2);
     }
 
     method keypressed($k) {
@@ -134,6 +140,15 @@ class Menu is Steroids::State {
             self.reset_state('main');
             self.change_state('main');
         } elsif $k eq 'Q' {
+            self.quit;
+        }
+    }
+
+    method gamepad($e) {
+        if self.gamepads[0].is_pressed("START") {
+            self.reset_state('main');
+            self.change_state('main');
+        } elsif self.gamepads[0].is_pressed("BACK") {
             self.quit;
         }
     }
