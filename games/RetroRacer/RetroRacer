@@ -1,0 +1,69 @@
+#!/usr/bin/env perl6
+use lib '../../blib/lib';
+use Steroids;
+
+class Game is Steroids::State {
+    has $!player;
+    has $!last-obstacle = 100;
+    has $!distance = 0;
+    has $!passed = 0;
+    has $!over;
+
+    method create {
+        self.load_bitmap('background', 'assets/background.png');
+        self.load_bitmap('othercar', 'assets/othercar.png');
+        self.load_bitmap('player', 'assets/racecar.png');
+        self.add_sprite('background', 0, 0);
+        $!player = self.add_sprite('player', 0, 0);
+        $!player.x = Int($.width/2 - $!player.w/2);
+        $!player.y = Int($.height - $!player.h - 10);
+    }
+
+    method update($) {
+        return if $!over;
+        if self.is_pressed("Left") {
+            $!player.x -= 20;
+            if $!player.x < 0 {
+                $!player.x = 0
+            }
+        }
+        if self.is_pressed("Right") {
+            $!player.x += 20;
+            if $!player.x + $!player.w > $.width {
+                $!player.x = $.width - $!player.w
+            }
+        }
+
+        if $!distance > $!last-obstacle + 50 {
+            my @lanes = <30 240 450>.pick(2)».Int;
+            @lanes.shift if rand > 0.5;
+            for @lanes {
+                my $s = self.add_sprite('othercar', $_, 0);
+                $s.y -= $s.h;
+                $s.velocity[1] = 15;
+                $s.when({ $_.y > $.height }, {
+                    self.remove_sprite($_);
+                    $!passed++;
+                });
+                $s.when({ $_.collides_with($!player) }, {
+                    if not $!over {
+                        $!over = True;
+                        say "Game over! $!passed drivers passed";
+                        for @.entities {
+                            $_.velocity[1] = 0
+                        }
+                    }
+                });
+            }
+            $!last-obstacle = $!distance;
+        }
+
+        $!distance++;
+    }
+}
+
+given Steroids::Game.new(width => 600, height => 800) {
+    .add_state('main', { Game.new });
+    .change_state('main');
+    .start;
+}

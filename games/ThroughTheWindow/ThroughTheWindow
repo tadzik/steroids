@@ -1,0 +1,84 @@
+#!/usr/bin/env perl6
+use lib '../../blib/lib';
+use Steroids;
+
+constant GROUNDLEVEL = 600;
+
+class Game is Steroids::State {
+    has $!runner;
+    has @!obstacles;
+    has $!last-obstacle = 100;
+    has $!last-cloud = 0;
+    has $!distance = 0;
+    has $!jumped = False;
+
+    method create {
+        self.load_bitmap('background', 'assets/background.bmp');
+        self.load_bitmap('runner', 'assets/runner.bmp');
+        self.load_bitmap('tree', 'assets/tree.bmp');
+        self.load_bitmap('cow', 'assets/cow.bmp');
+        self.load_bitmap('cloud', 'assets/cloud.bmp');
+        self.load_bitmap('banner1', 'assets/banner1.bmp');
+        self.load_bitmap('banner2', 'assets/banner2.bmp');
+        self.add_sprite('background', 0, 0);
+        $!runner = self.add_sprite('runner', 50, GROUNDLEVEL);
+        $!runner.y -= $!runner.h;
+        $!runner.when({ $_.y > GROUNDLEVEL - $_.h }, {
+            $!runner.y = GROUNDLEVEL - $!runner.h;
+            $!runner.velocity[1] = 0;
+        });
+
+        my $b = self.add_sprite('banner1', self.width, GROUNDLEVEL);
+        $b.velocity[0] = -5;
+    }
+
+    method update($) {
+        $!runner.velocity[1]++; # gravity
+        if @!obstacles
+        and @!obstacles[0].x < ($!runner.x + $!runner.w) < (@!obstacles[0].x + @!obstacles[0].w)
+        and $!runner.y + $!runner.h > @!obstacles[0].y {
+            say "===========================================";
+            say " Game over! You traveled $!distance pixels ";
+            say "===========================================";
+            say "";
+            self.quit;
+        }
+
+        if $!distance > $!last-obstacle + 40 and rand > 0.9 {
+            my $s = self.add_sprite(<cow tree>.pick, self.width, GROUNDLEVEL);
+            $s.y -= $s.h;
+            $s.velocity[0] = -12;
+            @!obstacles.push: $s;
+            $s.when({ $_.x < 0 - $_.w }, {
+                self.remove_sprite($_);
+                @!obstacles.shift;
+            });
+            $!last-obstacle = $!distance;
+        }
+        if $!distance > $!last-cloud + 25 and rand > 0.9 {
+            my $c = self.add_sprite('cloud', self.width, <50 150>.pick.Int);
+            $c.velocity[0] = Int(-$c.y / 10);
+            $c.when({ $_.x < 0 - $_.w }, {
+                self.remove_sprite($_);
+            });
+            $!last-cloud = $!distance;
+        }
+
+        if self.is_pressed("Space") and $!runner.y == GROUNDLEVEL - $!runner.h {
+            $!runner.velocity[1] = -22;
+            unless $!jumped {
+                $!jumped = True;
+                my $b = self.add_sprite('banner2', self.width, GROUNDLEVEL);
+                $b.y += $b.h;
+                $b.velocity[0] = -5;
+            }
+        }
+        $!distance++;
+    }
+}
+
+given Steroids::Game.new {
+    .add_state('main', { Game.new });
+    .change_state('main');
+    .start;
+}
