@@ -81,12 +81,14 @@ class Main is Steroids::State {
         }
     }
 
-    method gamepad($ev) {
-        if self.gamepads[0].is_pressed("A") {
+    method gamepad($e) {
+        return unless $e.type eq 'button_down';
+        if $e.button eq 'A' {
             self.fire
-        }
-        if self.gamepads[0].is_pressed("START") {
+        } elsif $e.button eq 'START' {
             self.paused = !self.paused;
+        } elsif $e.button eq 'BACK' {
+            self.change_state('menu');
         }
     }
 
@@ -145,10 +147,11 @@ class Menu is Steroids::State {
     }
 
     method gamepad($e) {
-        if self.gamepads[0].is_pressed("START") {
+        return unless $e.type eq 'button_down';
+        if $e.button eq 'START' {
             self.reset_state('main');
             self.change_state('main');
-        } elsif self.gamepads[0].is_pressed("BACK") {
+        } elsif $e.button eq 'BACK' {
             self.quit;
         }
     }

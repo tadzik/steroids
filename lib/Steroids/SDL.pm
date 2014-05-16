@@ -15,6 +15,17 @@ class Steroids::Gamepad::Event is repr('CStruct') {
     has int32 $.id;
     has int32 $.source;
     has int32 $.value;
+
+    method type {
+        return <analog_left_x analog_left_y trigger_left
+                analog_right_x analog_right_y trigger_right
+                dpad button_down button_up>[$!source]
+    }
+
+    method button {
+        my @button_names = <A B X Y LB RB BACK START XBOX LA RA>;
+        return @button_names[$!value];
+    }
 }
 
 class Rectangle is repr('CStruct') {
