@@ -71,18 +71,43 @@ class Game {
             }
         }
         sub update_cb(int32 $dt) {
+            state $cnt = 0;
             my $cur = %!states{$!current-state};
+            my $t0 = nqp::time_n();
             $cur.physics($dt);
+            my $t1 = nqp::time_n();
             $cur.events();
+            my $t2 = nqp::time_n();
             $cur.animations($dt);
+            my $t3 = nqp::time_n();
             $cur.update($dt);
+            my $t4 = nqp::time_n();
             CATCH {
                 .say
             }
+            if $cnt++ %% 30 {
+                if $t4 - $t0 > 0.016 {
+                    say    "====TOO SLOW!!====";
+                    printf "Frame took: %.4f\n", $t4 - $t0;
+                    printf "Physics:    %.4f\n", $t1 - $t0;
+                    printf "Events:     %.4f\n", $t2 - $t1;
+                    printf "Animations: %.4f\n", $t3 - $t2;
+                    printf "update():   %.4f\n", $t4 - $t3;
+                }
+            }
         }
         sub draw_cb {
+            state $cnt = 0;
             my $cur = %!states{$!current-state};
+            my $t0 = nqp::time_n();
             $cur.draw();
+            my $t1 = nqp::time_n();
+            if $cnt++ %% 30 {
+                if $t1 - $t0 > 0.016 {
+                    say    "====TOO SLOW!!====";
+                    printf "Rendering:  %.4f\n", $t1 - $t0;
+                }
+            }
             CATCH {
                 .say
             }
