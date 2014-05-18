@@ -71,6 +71,7 @@ class Steroids::State {
     method events {
         return if $!paused;
         for @!entities -> $ent {
+            next unless $ent.events;
             for $ent.events -> $ev {
                 if $ev[0].($ent) {
                     $ev[1].($ent)
@@ -82,8 +83,8 @@ class Steroids::State {
     method physics(int32 $dt) {
         return if $!paused;
         for @!entities {
-            $_.x += $_.velocity[0];
-            $_.y += $_.velocity[1];
+            $_.x += $_.velocity[0] if $_.velocity[0];
+            $_.y += $_.velocity[1] if $_.velocity[1];
         }
     }
 
