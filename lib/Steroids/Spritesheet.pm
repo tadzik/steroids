@@ -8,4 +8,8 @@ class Steroids::Spritesheet {
     method draw($game, Int $x, Int $y, Int $frame) {
         game_draw_spritesheet_frame($game, $!tex, $!w, $!h, $frame, $x, $y)
     }
+
+    method free {
+        game_free_texture($!tex)
+    }
 }

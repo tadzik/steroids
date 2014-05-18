@@ -12,6 +12,10 @@ class Steroids::Entity {
         $!img.draw($game, $!x, $!y, $!frame)
     }
 
+    method free() {
+        $!img.free();
+    }
+
     method when (&condition, &action) {
         @!events.push: [&condition, &action];
     }

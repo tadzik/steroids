@@ -9,6 +9,10 @@ class Texture is repr('CStruct') {
     method draw($game, Int $x, Int $y, Int $frame) {
         game_draw_texture($game, self, $x, $y)
     }
+
+    method free {
+        game_free_texture(self)
+    }
 }
 
 class Steroids::Gamepad::Event is repr('CStruct') {
@@ -49,6 +53,7 @@ sub game_loop(OpaquePointer)                                       is native(PAT
 sub game_quit(OpaquePointer)                                       is native(PATH) is export { * }
 sub game_free(OpaquePointer)                                       is native(PATH) is export { * }
 sub game_load_texture(OpaquePointer, Str) returns Texture          is native(PATH) is export { * }
+sub game_free_texture(Texture)                                     is native(PATH) is export { * }
 sub game_renderer_clear(OpaquePointer)                             is native(PATH) is export { * }
 sub game_draw_texture(OpaquePointer, Texture, int32, int32)        is native(PATH) is export { * }
 sub game_draw_spritesheet_frame(OpaquePointer, Texture,

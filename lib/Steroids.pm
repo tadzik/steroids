@@ -128,11 +128,13 @@ class Game {
     }
 
     method load_bitmap(Str $name, Str $path) {
+        %!assets{$name}.?free;
         %!assets{$name} = game_load_texture($!game, $path);
     }
 
     method load_spritesheet(Str $name, Str $path,
                             Int $w, Int $h, Int $framecnt) {
+        %!assets{$name}.?free;
         my $tex = game_load_texture($!game, $path);
         %!assets{$name} = Steroids::Spritesheet.new(:$tex, :$w, :$h, :$framecnt);
     }

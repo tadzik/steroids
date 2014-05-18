@@ -142,6 +142,13 @@ game_load_texture(Game *game, const char *path)
 }
 
 extern void
+game_free_texture(Texture *t)
+{
+    SDL_DestroyTexture(t->tex);
+    free(t);
+}
+
+extern void
 game_renderer_clear(Game *game)
 {
     SDL_RenderClear(game->renderer);
