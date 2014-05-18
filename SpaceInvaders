@@ -43,7 +43,6 @@ class Main is Steroids::State {
     }
 
     method fire {
-        return if $!bullets_alive > 2;
         my $bullet = self.add_sprite('laser', $!player.x, $!player.y);
         $bullet.x += Int($!player.w/2 - $bullet.w/2);
         $bullet.velocity = [0, -15];

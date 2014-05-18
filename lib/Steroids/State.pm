@@ -44,6 +44,10 @@ class Steroids::State {
         return $a;
     }
 
+    method remove_animation(Steroids::Animation $a) {
+        @!animations.=grep(* !=== $a);
+    }
+
     method add_text(Str $text, Str $font, Steroids::Colour $c, Int $x, Int $y) {
         unless self.parent.fonts{$font}:exists {
             die "Font $font not loaded"
