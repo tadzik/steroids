@@ -2,7 +2,7 @@
 
 PERL6  = perl6-m
 DESTDIR= 
-PREFIX = /home/tadzik/.rakudobrew/moar-HEAD/install/languages/perl6/site
+PREFIX = ~/.rakudobrew/moar-HEAD/install/languages/perl6/site
 BLIB   = blib
 P6LIB  = $(PWD)/$(BLIB)/lib:$(PWD)/lib:$(PERL6LIB)
 CP     = cp -p
