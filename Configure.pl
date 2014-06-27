@@ -2,23 +2,25 @@ use v6;
 
 my $name = 'sdlwrapper';
 my ($c_line, $l_line);
-if $*VM<name> eq 'parrot' {
-    my $o  = $*VM<config><o>;
-    my $so = $*VM<config><load_ext>;
-    $c_line = "-c $*VM<config><cc_shared> $*VM<config><cc_o_out>$name$o $*VM<config><ccflags> $name.c";
-    $l_line = "$*VM<config><ld_load_flags> $*VM<config><ldflags> " ~
-        "$*VM<config><libs> $*VM<config><ld_out>$name$so $name$o";
+if $*VM.name eq 'parrot' {
+    my $cfg = $*VM.config;
+    my $o  = $cfg<o>;
+    my $so = $cfg<load_ext>;
+    $c_line = "-c $cfg<cc_shared> $cfg<cc_o_out>$name$o $cfg<ccflags> $name.c";
+    $l_line = "$cfg<ld_load_flags> $cfg<ldflags> " ~
+        "$cfg<libs> $cfg<ld_out>$name$so $name$o";
 }
-elsif $*VM<name> eq 'moar' {
-    my $o  = $*VM<config><obj>;
-    my $so = $*VM<config><dll>.subst('lib%s', '');
-    $c_line = "-c $*VM<config><ccshared> $*VM<config><ccout>$name$o $*VM<config><cflags> $name.c";
-    $l_line = "$*VM<config><ldshared> $*VM<config><ldflags> " ~
-        "$*VM<config><ldlibs> $*VM<config><ldout>$name$so $name$o";
+elsif $*VM.name eq 'moar' {
+    my $cfg = $*VM.config;
+    my $o  = $cfg<obj>;
+    my $so = $cfg<dll>.subst('lib%s', '');
+    $c_line = "-c $cfg<ccshared> $cfg<ccout>$name$o $cfg<cflags> $name.c";
+    $l_line = "$cfg<ldshared> $cfg<ldflags> " ~
+        "$cfg<ldlibs> $cfg<ldout>$name$so $name$o";
 }
-elsif $*VM<name> eq 'jvm' {
+elsif $*VM.name eq 'jvm' {
     #say "$*VM<config><nativecall.ccdlflags>";
-    my $cfg = $*VM<config>;
+    my $cfg = $*VM.config;
     $c_line = "-c $cfg<nativecall.ccdlflags> -o$name$cfg<nativecall.o> $cfg<nativecall.ccflags> $name.c";
     $l_line = "$cfg<nativecall.libs> $cfg<nativecall.lddlflags> $cfg<nativecall.ldflags> $cfg<nativecall.ldout>$name.$cfg<nativecall.so> $name$cfg<nativecall.o>";
 }
