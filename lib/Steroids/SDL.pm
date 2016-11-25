@@ -39,13 +39,13 @@ class Rectangle is repr('CStruct') {
     has int32 $.h;
 }
 
-sub game_aabb_collision(Rectangle, Rectangle) returns Int          is native(PATH) is export { * }
+sub game_aabb_collision(Rectangle, Rectangle) returns int32        is native(PATH) is export { * }
 
 sub game_init(int32, int32) returns OpaquePointer                  is native(PATH) is export { * } 
-sub game_set_keypressed_cb(OpaquePointer, &cb(int32))              is native(PATH) is export { * }
-sub game_set_gamepad_cb(OpaquePointer, &cb(Steroids::Gamepad::Event)) is native(PATH) is export { * }
-sub game_set_update_cb(OpaquePointer, &cb(int32))                  is native(PATH) is export { * }
-sub game_set_draw_cb(OpaquePointer, &cb())                         is native(PATH) is export { * }
+sub game_set_keypressed_cb(OpaquePointer, &cb (int32))             is native(PATH) is export { * }
+sub game_set_gamepad_cb(OpaquePointer, &cb (Steroids::Gamepad::Event)) is native(PATH) is export { * }
+sub game_set_update_cb(OpaquePointer, &cb (int32))                 is native(PATH) is export { * }
+sub game_set_draw_cb(OpaquePointer, &cb ())                        is native(PATH) is export { * }
 sub game_is_pressed(int32) returns int32                           is native(PATH) is export { * }
 sub game_is_pressed_name(Str) returns int32                        is native(PATH) is export { * }
 sub game_is_running(OpaquePointer) returns int32                   is native(PATH) is export { * }
